@@ -1,0 +1,12 @@
+numpy==1.26.4
+pandas==2.3.3
+scipy
+opencv-python
+Pillow
+matplotlib
+scikit-image
+PyYAML
+py360convert
+transformers
+pythermalcomfort
+mmsegmentation==1.2.2

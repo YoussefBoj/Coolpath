@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+.DS_Store
+.ipynb_checkpoints/
+
+# Data, model weights and generated artifacts are not versioned
+data/raw/
+data/outputs/
+data/cvat_export_360/
+checkpoints/*.pth
+BFM_segmentation/
+*.pth
+*.pt
+*.safetensors
+
+# Keep directory placeholders if you create them manually
+!data/**/.gitkeep

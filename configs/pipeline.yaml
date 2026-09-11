@@ -1,0 +1,67 @@
+paths:
+  raw_videos_dir: data/raw/video360
+  all_images_dir: data/outputs/video360_annotation/candidate_frames
+  frames_to_annotate_dir: data/outputs/video360_annotation/frames_to_annotate
+  cvat_export_dir: data/cvat_export_360
+  dataset_dir: data/outputs/dataset_coolpath_360
+  checkpoints_dir: checkpoints
+  semantic_work_dir: data/outputs/final_training_m2f
+  semantic_masks_dir: data/outputs/fusion_3models_v2_1041/masks_semantic
+  bfms_model_dir: BFM_segmentation/mask2former_1014f_BFMS_768_200epoch
+  bfms_output_dir: data/outputs/bfms_materials_1041
+  fusion_output_dir: data/outputs/fusion_3models_v2_1041
+  indicators_output_dir: data/outputs/indicateurs_v2_1041
+  comfypack_csv: data/raw/comfypack/CR1000X_00-01_ComfyPackData_2s_20260611_brut.csv
+  analysis_output_dir: data/outputs/correlation_v8_visualisation_complete
+  ral_table: resources/ral_albedo.csv
+
+selection:
+  candidate_fps: 0.5
+  blur_threshold: 100.0
+  dedup_threshold: 0.15
+  quotas:
+    "GS017064[1]_equirect.mp4": 12
+    "GS017065[1]_equirect.mp4": 17
+    "GS017066[1]_equirect.mp4": 35
+    "GS017067[1]_equirect.mp4": 11
+    "GS017068[1]_equirect.mp4": 13
+    "GS017069[1]_equirect.mp4": 24
+    "GS017070[1]_equirect.mp4": 38
+
+training:
+  max_iters: 5000
+  val_interval: 250
+  seed: 42
+  val_fraction: 0.20
+  base_config: checkpoints/mask2former_swin-b-in22k-384x384-pre_8xb2-90k_cityscapes-512x1024.py
+  start_checkpoint: checkpoints/mask2former_swin-b-in22k-384x384-pre.pth
+
+bfms:
+  scales: [768, 896, 1024]
+
+indicators:
+  elevation_threshold_deg: -7.0
+  azimuth_width_deg: 12.0
+  n_sectors: 8
+
+analysis:
+  day: "2026-06-11"
+  windows_s: [30, 60, 120]
+  reference_window_s: 60
+  ta_source: HMP_Temp
+  t0:
+    GS017064: "14:22:18"
+    GS017065: "14:27:14"
+    GS017066: "14:32:06"
+    GS017067: "14:40:14"
+    GS017068: "14:43:02"
+    GS017069: "14:46:14"
+    GS017070: "14:52:40"
+  fps:
+    GS017064: 59.94
+    GS017065: 59.94
+    GS017066: 59.94
+    GS017067: 59.94
+    GS017068: 59.94
+    GS017069: 59.94
+    GS017070: 59.94
