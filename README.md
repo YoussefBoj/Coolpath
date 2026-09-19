@@ -42,10 +42,11 @@ python run.py --mode test
 Changer de mode ne nécessite aucune modification du code Python. Les deux blocs
 `training:` et `test:` restent dans le même fichier, prêts à être réutilisés.
 
-**Les données et les poids des modèles ne sont pas inclus.** Le dépôt ne peut pas
-produire des prédictions sans le couple configuration + poids. Les poids CoolPath
-et BFMS n’étaient pas présents dans les pièces sources ; aucun faux lien de
-téléchargement n’est fourni. Voir [les fichiers à ajouter](docs/MODELES.md).
+**Les données et les poids des modèles ne sont pas inclus dans GitHub.** Le dépôt ne peut pas
+produire des prédictions sans le couple configuration + poids. Le modèle BFMS est référencé sur Figshare et les modèles publics sur MMSegmentation.
+Le modèle fine-tuné de l’autrice et les données sont distribués séparément sur Drive
+(lien Drive à compléter). Voir [les sources des modèles](docs/MODELES.md) et
+[le rôle de chaque dossier Drive](docs/DRIVE.md).
 
 ## Ce qui peut être activé en mode test
 

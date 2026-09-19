@@ -1,8 +1,7 @@
-# Modèles à ajouter localement
+# Modèles externes
 
-- `semantic/` : configuration d’inférence résolue + poids sémantiques.
-- `pretrained/` : modèle complet Mask2Former Swin-B Cityscapes de départ.
-- `bfms/` : dossier Hugging Face avec poids, config et processeur matériaux.
+- `semantic/` : le modèle **fine-tuné de l’autrice**, exporté depuis `final_training_m2f` du Drive.
+- `pretrained/` ou `checkpoints/` : configurations et poids publics MMSegmentation utilisés comme références ou points de départ.
+- `bfms/` : le modèle matériaux [BFMS fourni sur Figshare](https://figshare.com/s/fd38d547fdb8708381f5), dans le format attendu par le chargeur.
 
-Lire [le guide modèles](../docs/MODELES.md). Les poids ne sont pas inclus et sont
-ignorés par Git. Un entraînement produit son modèle dans `outputs/train_.../model/`.
+Voir [MODELES.md](../docs/MODELES.md) pour les sources et [DRIVE.md](../docs/DRIVE.md) pour les dossiers historiques. Les poids sont exclus de Git.
