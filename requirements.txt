@@ -1,12 +1,10 @@
+# Core: no GPU needed for data checks and numerical tests.
 numpy==1.26.4
 pandas==2.3.3
-scipy
-opencv-python
-Pillow
-matplotlib
-scikit-image
-PyYAML
-py360convert
-transformers
-pythermalcomfort
-mmsegmentation==1.2.2
+scipy>=1.11,<1.15
+opencv-python==4.10.0.84
+Pillow>=10,<12
+matplotlib>=3.8,<3.10
+scikit-image>=0.22,<0.25
+PyYAML>=6,<7
+py360convert>=0.1,<2

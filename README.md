@@ -1,113 +1,107 @@
-# CoolPath 360° pipeline
+# CoolPath — analyser des scènes urbaines à partir d’images
 
-Python refactoring of the PFE notebooks used to characterize the pedestrian-visible urban environment from 360° panoramas and relate it to microclimatic measurements.
+CoolPath transforme des images de rue en cartes des éléments visibles : ciel,
+végétation, bâtiments, chaussée, etc. À partir de panoramas 360°, il peut aussi
+estimer des indicateurs de végétation, d’ouverture au ciel et de perméabilité
+apparente, puis les rapprocher de mesures microclimatiques.
 
-## Scientific pipeline
+**Deux modes, un seul point d’entrée : `python run.py`.**
 
-```text
-360° videos
-  -> frame extraction / blur filtering / diverse selection
-  -> CVAT pre-annotation and manual correction
-  -> Mask2Former fine tuning (Cityscapes 19 classes)
-  -> semantic inference on the full route
-  -> BFMS material segmentation
-  -> semantic/material gating + fixed albedo / RAL
-  -> spherical-geometry-aware SVF/GVI + permeability + visible building fraction
-  -> Comfy'Pack processing + Tmrt + UTCI
-  -> globe inertia / historical exposure
-  -> Pearson, Spearman, effective N, partial Spearman permutations, FDR, Moran I and HAC models
-```
+| Votre objectif | Mode | Ce que vous apportez | Ce que vous obtenez |
+|---|---|---|---|
+| Adapter le modèle à vos images | `train` | Images + annotations + modèle de départ | Modèle adapté, configuration exportée, logs et scores de validation |
+| Analyser de nouvelles images | `test` | Images + modèle entraîné et sa configuration | Masques, aperçus colorés ; scores si annotations ; analyses optionnelles |
 
-The repository preserves the distinction used in the notebooks: the manually validated annotation set is used for training/validation, while the full set of route frames is used for inference and downstream indicators.
+`train` est un **fine-tuning de la segmentation sémantique** sur les 19 classes
+Cityscapes du projet. BFMS est utilisé comme modèle matériaux préentraîné ;
+son entraînement n’est pas implémenté dans les notebooks fournis.
+`test` signifie d’abord « appliquer le modèle ». Des scores de précision ne sont
+calculés que si de vraies annotations sont fournies.
 
-## Repository layout
+## Commencer
 
-```text
-configs/                 Reproducible parameters and paths
-resources/               RAL/albedo lookup extracted from notebook 25
-src/coolpath/data/       Video extraction, selection, CVAT conversion/preannotation
-src/coolpath/segmentation/ Mask2Former training, inference and evaluation
-src/coolpath/materials/  BFMS, semantic gating, RAL and albedo
-src/coolpath/indicators/ Equirectangular geometry and urban indicators
-src/coolpath/thermal/    Comfy'Pack QC, Tmrt, UTCI and thermal history
-src/coolpath/analysis/   Statistical analysis
-scripts/                 Ordered command-line entry points
-tests/                   Unit tests for core numerical logic
-```
-
-## Important refactoring decision
-
-The notebooks used two aliases for the directory containing the complete route images (`video360_annotation/candidate_frames` and `dataset_coolpath_360/candidate_frames`). The refactored code uses one configurable path only: `paths.all_images_dir`. The default points to the directory actually produced by notebook 22.
-
-No raw data, model checkpoint, CVAT export or BFMS weights are included. Put them at the paths configured in `configs/pipeline.yaml` or edit the YAML for your machine. This removes the Windows absolute paths embedded in the notebooks.
-
-## Installation
-
-Python 3.10 is recommended because it matches the notebook environment. Create an environment and install the package:
+1. Suivre [l’installation](docs/INSTALLATION.md) une fois.
+2. Préparer les [données](docs/DONNEES.md) et les [modèles](docs/MODELES.md).
+3. Ouvrir **`configs/config.yaml`**, choisir `mode: train` ou `mode: test`,
+   puis renseigner les chemins de votre dataset et du modèle.
+4. Dans un terminal ouvert dans ce dossier :
 
 ```bash
-python -m venv .venv
-# Windows: .venv\\Scripts\\activate
-# Linux/macOS: source .venv/bin/activate
-pip install -U pip
-pip install -r requirements.txt
-pip install -e .
+python run.py --check
+python run.py
 ```
 
-PyTorch/MMCV are CUDA-sensitive. Install the PyTorch build matching your NVIDIA driver/CUDA first, then install the compatible MMCV build for MMSegmentation 1.2.2. The notebooks were run with MMSegmentation 1.2.2; different notebook stages used different PyTorch/CUDA builds, so PyTorch is deliberately not hard-pinned here.
-
-## Configuration
-
-Edit `configs/pipeline.yaml`. In particular:
-
-- `paths.raw_videos_dir`
-- `paths.cvat_export_dir`
-- `paths.checkpoints_dir`
-- `paths.bfms_model_dir`
-- `paths.comfypack_csv`
-
-The defaults for the main experimental parameters are copied from the supplied notebooks, including 0.5 candidate fps, blur threshold 100, 5000 Mask2Former iterations, BFMS scales 768/896/1024, vegetation elevation threshold -7°, azimuth-width filter 12°, and 30/60/120 s analysis windows.
-
-## Run the pipeline
+Le [guide débutant pas à pas](docs/DEMARRAGE.md) explique les deux parcours.
+On peut également remplacer temporairement le choix du fichier :
 
 ```bash
-python scripts/01_extract_select_frames.py
-# optional automatic CVAT polygon preannotation, using an already available semantic checkpoint:
-python scripts/02_preannotate_cvat.py --model-config PATH_TO_CFG --checkpoint PATH_TO_PTH
-
-# After manual correction/export from CVAT:
-python scripts/03_prepare_training_dataset.py
-python scripts/04_train_mask2former.py
-python scripts/05_run_semantic_inference.py
-python scripts/06_run_bfms.py
-python scripts/07_fuse_materials_albedo.py
-python scripts/08_compute_urban_indicators.py
-python scripts/09_analyze_microclimate.py
+python run.py --mode train
+python run.py --mode test
 ```
 
-## What was intentionally cleaned up
+Changer de mode ne nécessite aucune modification du code Python. Les deux blocs
+`training:` et `test:` restent dans le même fichier, prêts à être réutilisés.
 
-Notebook-only displays, one-off debug cells and repeated diagnostic plots were not mixed into the production functions. The scientifically relevant computations were kept in modules. Model/data paths and experiment parameters were moved to YAML. Expensive deep-learning imports are local to the functions that need them so the numerical modules can be tested without loading CUDA models.
+**Les données et les poids des modèles ne sont pas inclus.** Le dépôt ne peut pas
+produire des prédictions sans le couple configuration + poids. Les poids CoolPath
+et BFMS n’étaient pas présents dans les pièces sources ; aucun faux lien de
+téléchargement n’est fourni. Voir [les fichiers à ajouter](docs/MODELES.md).
 
-The BFMS semantic gating remains a pragmatic consistency correction. It should not be interpreted as validation of the raw BFMS predictions on the CoolPath domain.
+## Ce qui peut être activé en mode test
 
-## Tests
+Par défaut, seule la segmentation sémantique est lancée, avec des aperçus.
+Dans le bloc `test:` du YAML :
+
+| Paramètre | Effet | Conditions |
+|---|---|---|
+| `labels_dir: null` | Pas de score, seulement des prédictions | Pour les scores, remplacer `null` par le dossier de masques annotés |
+| `materials: true` | Matériaux BFMS, fusion et albédo | Modèle BFMS local complet |
+| `indicators: true` | SVF, GVI, bâti et perméabilité | `materials: true`, panoramas 360° complets 2:1, horizon centré |
+| `analysis: true` | Analyse des relations avec le microclimat | `indicators: true`, capteurs et horaires de votre acquisition |
+
+Les chiffres SVF/GVI décrivent la vue depuis la caméra. La perméabilité et
+l’albédo sont des estimations fondées sur des classes et des hypothèses ; ce ne
+sont pas des mesures physiques directes. Lire [les limites](docs/METHODOLOGIE.md).
+
+## Résultats
+
+Chaque lancement crée `outputs/train_<date>/` ou `outputs/test_<date>/`.
+La configuration utilisée, les versions de bibliothèques et le statut sont
+sauvegardés. Les résultats précédents ne sont pas écrasés.
+
+Après `train`, le terminal donne les deux chemins à reporter dans `test` :
+`model_config` et `checkpoint`. Les [sorties expliquées](docs/RESULTATS.md)
+indiquent quels fichiers ouvrir et comment comprendre les scores.
+
+## Organisation du dépôt
+
+| Dossier / fichier | Rôle |
+|---|---|
+| `run.py` | Lanceur simple |
+| `configs/config.yaml` | Configuration principale train/test |
+| `src/coolpath/cli.py` | Contrôles et enchaînement des étapes |
+| `src/coolpath/data/` | Images, vidéo, annotations CVAT, découpage du dataset |
+| `src/coolpath/segmentation/` | Entraînement, export et inférence |
+| `src/coolpath/materials/` | BFMS, fusion et albédo |
+| `src/coolpath/indicators/` | Géométrie sphérique et indicateurs urbains |
+| `src/coolpath/thermal/`, `analysis/` | Capteurs et statistiques |
+| `docs/` | Guides d’utilisation, méthodologie et dépannage |
+| `scripts/` | Étapes individuelles pour usage avancé |
+| `configs/pipeline.yaml` | Ancien exemple expérimental, utilisé seulement par les scripts numérotés |
+| `tests/` | Vérifications numériques et du fonctionnement train/test |
+
+Les notebooks 22, 23, 24, 25, 29 et 30 sont les références. La correspondance et
+les changements sont décrits dans [MIGRATION.md](MIGRATION.md). Les notebooks
+avec leurs images intégrées et l’historique de conversation ne sont pas recopiés
+dans ce dépôt Python.
+
+## Validation et publication
 
 ```bash
-pytest -q
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
 ```
 
-The tests cover analytical SVF cases (full sky and 30°/45°/60° zenith cones), solid-angle GVI behavior, semantic/material gating, FDR and correlation calculations.
-
-## Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Refactor CoolPath notebooks into reproducible Python pipeline"
-git branch -M main
-git remote add origin https://github.com/<YOUR_USERNAME>/<YOUR_REPO>.git
-git push -u origin main
-```
-
-Before pushing, verify that no raw measurements or large model weights were accidentally added (`git status`). The supplied `.gitignore` excludes those by default.
+Le détail des vérifications effectuées et de leurs limites est dans
+[VALIDATION.md](VALIDATION.md). Le guide [Publier sur GitHub](docs/GITHUB.md)
+explique comment déposer le projet et rendre les modèles disponibles aux autres.

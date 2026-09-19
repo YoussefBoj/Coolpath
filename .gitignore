@@ -19,3 +19,25 @@ BFM_segmentation/
 
 # Keep directory placeholders if you create them manually
 !data/**/.gitkeep
+
+# User datasets, local runs and model assets
+outputs/
+data/train/**
+data/test/**
+data/sensors/**
+models/**
+!models/**/
+!models/**/README.md
+!models/**/.gitkeep
+!data/**/
+!data/**/.gitkeep
+*.bin
+*.onnx
+*.mp4
+*.avi
+*.mov
+*.log
+*.egg-info/
+build/
+dist/
+.ruff_cache/

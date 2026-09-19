@@ -1,0 +1,8 @@
+# Install PyTorch and compiled MMCV FIRST: docs/INSTALLATION.md
+mmengine==0.10.5
+mmsegmentation==1.2.2
+mmdet==3.2.0
+transformers==4.44.2
+safetensors>=0.4,<1
+ftfy>=6,<7
+regex

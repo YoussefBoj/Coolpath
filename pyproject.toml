@@ -4,10 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "coolpath-pipeline"
-version = "0.1.0"
+version = "0.2.0"
 description = "360-degree urban scene characterization and pedestrian microclimate analysis for CoolPath"
 requires-python = ">=3.10"
 readme = "README.md"
+
+dependencies = ["PyYAML>=6,<7", "numpy>=1.26,<2", "Pillow>=10,<12"]
+
+[project.scripts]
+coolpath = "coolpath.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

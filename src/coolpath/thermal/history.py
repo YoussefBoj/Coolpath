@@ -54,11 +54,11 @@ def detrend(values, t):
 
 
 def calibrate_globe_inertia(
-    kdown,
-    tg,
-    dt_s,
-    taus=(30, 60, 120, 180, 240, 300, 420),
-    lags=(0, 30, 60, 90, 120, 180),
+        kdown,
+        tg,
+        dt_s,
+        taus=(30, 60, 120, 180, 240, 300, 420),
+        lags=(0, 30, 60, 90, 120, 180),
 ):
     """Grid-search tau/lag by maximizing detrended r(Kdown_history, Tg)."""
     kdown = np.asarray(kdown, float)
@@ -73,7 +73,8 @@ def calibrate_globe_inertia(
             x = detrend(shifted, t)
             y = detrend(tg, t)
             ok = np.isfinite(x) & np.isfinite(y)
-            r = float(stats.pearsonr(x[ok], y[ok]).statistic) if ok.sum() >= 3 else np.nan
+            r = float(stats.pearsonr(
+                x[ok], y[ok]).statistic) if ok.sum() >= 3 else np.nan
             row = {"tau_s": tau, "lag_s": lag, "r": r}
             rows.append(row)
             if np.isfinite(r) and (best is None or r > best["r"]):
@@ -81,7 +82,10 @@ def calibrate_globe_inertia(
     return best, rows
 
 
-def unreliable_history_windows(t_s, tau_s, gap_max_s=20.0, fabricated_weight_limit=0.20):
+def unreliable_history_windows(t_s,
+                               tau_s,
+                               gap_max_s=20.0,
+                               fabricated_weight_limit=0.20):
     """Intervals where a large video gap would fabricate too much history.
 
     This preserves the notebook-30 safeguard: after a gap, history is marked

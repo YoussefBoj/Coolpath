@@ -1,0 +1,65 @@
+# À modifier dans VS Code ou un éditeur de texte. Guide : docs/DEMARRAGE.md
+# Le seul choix de fonctionnement : train ou test.
+mode: test
+project_root: ..  # les chemins ci-dessous partent de la racine du projet
+output_dir: outputs
+run_name: null    # null = nouveau dossier daté ; un nom existant est refusé
+
+test:
+  images_dir: data/test/images
+  # Les deux fichiers vont ensemble. Après un entraînement, copier ici les
+  # chemins affichés vers le dossier model/ du résultat.
+  model_config: models/semantic/model_config.py
+  checkpoint: models/semantic/model.pth
+  device: cuda:0  # cpu possible pour l’inférence, très lent
+  labels_dir: null  # optionnel : annotations PNG 0..18/255 pour calculer les scores
+  previews: true
+  # Panoramas 360° complets 2:1 requis pour les indicateurs.
+  materials: false
+  indicators: false  # exige materials: true (perméabilité)
+  analysis: false    # exige indicators: true et mesures Comfy’Pack synchronisées
+
+training:
+  dataset_format: indexed  # indexed (PNG 0..18/255) ou cvat
+  images_dir: data/train/images
+  labels_dir: data/train/labels
+  cvat_export_dir: data/train/cvat_export
+  base_config: models/pretrained/mask2former_base.py
+  start_checkpoint: models/pretrained/pretrained.pth
+  split_strategy: random  # group recommandé pour des séquences vidéo ; voir docs/DONNEES.md
+  groups_csv: null        # avec group : data/train/groups.csv
+  split_dir: null         # avec files : dossier contenant train.txt et val.txt
+  val_fraction: 0.20
+  seed: 42
+  max_iters: 5000
+  val_interval: 250
+  batch_size: 2
+  num_workers: 0          # simple sous Windows ; augmenter si adapté
+  accumulation: 4
+  learning_rate: 0.00005
+  amp: true
+  resume_from: null       # chemin explicite vers un checkpoint complet pour reprendre
+
+bfms:
+  model_dir: models/bfms
+  scales: [768, 896, 1024]
+  # Convention conservée du notebook 24 : no-object devient Background.
+  no_object_policy: notebook
+
+fusion:
+  ral_table: resources/ral_albedo.csv
+  paint_albedo: null      # null = estimation RAL globale ; sinon valeur fixe entre 0 et 1
+
+indicators:
+  elevation_threshold_deg: -7.0
+  azimuth_width_deg: 12.0
+  n_sectors: 8
+
+analysis:
+  comfypack_csv: data/sensors/comfypack.csv
+  day: null              # YYYY-MM-DD, date de VOTRE acquisition
+  t0: {}                 # exemple : {GS017064: '14:22:18'}
+  fps: {}                # exemple : {GS017064: 59.94} ; fréquence vidéo originale
+  windows_s: [30, 60, 120]
+  reference_window_s: 60
+  ta_source: HMP_Temp

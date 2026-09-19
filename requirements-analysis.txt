@@ -1,0 +1,1 @@
+pythermalcomfort>=3,<4

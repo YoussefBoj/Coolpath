@@ -29,3 +29,29 @@
 3. Interactive plots and ad-hoc diagnostic cells are not executed as part of the production pipeline.
 4. Raw data and model weights are excluded from version control.
 5. Numerical logic is separated from deep-learning model loading to enable unit testing.
+
+## Version 0.2 — lanceur train/test
+
+- `configs/config.yaml` devient l’entrée principale ; l’ancien `pipeline.yaml`
+  reste un exemple expérimental réservé aux scripts numérotés.
+- `run.py`, `python -m coolpath` et la commande `coolpath` dispatchent `train`
+  et `test`. Précontrôles, sorties isolées et suivi du statut sont ajoutés.
+- Les chemins relatifs sont résolus depuis la racine configurée, et non `src/`.
+- Images/masques validés, suffixes mixtes normalisés en PNG pour l’apprentissage.
+- Split aléatoire robuste aux noms quelconques, groupes réellement disjoints,
+  ou listes explicites. La stratification historique intra-vidéo ne prouve pas
+  l’indépendance des lots ; la ligne « grouped by video » ci-dessus désigne cet
+  ancien comportement, pas le nouveau mode `group`.
+- Configuration MMSeg : remplacement complet des dataloaders hérités pour éviter
+  de garder `label_map`/`reduce_zero_label` de Cityscapes ; AMP explicite, seed
+  configurable, meilleur checkpoint choisi par itération numérique, export résolu.
+- BFMS chargé depuis un dossier Hugging Face avec sa configuration de processeur.
+  La convention de post-traitement du notebook est conservée.
+- La moyenne RGB de peinture est accumulée par sommes de pixels, avec le traitement
+  des pixels quasi noirs du notebook ; consommation mémoire réduite.
+- Le nombre de secteurs est transmis au calcul des indicateurs.
+- Scores de test indépendant et aperçus colorés ajoutés ; définitions de mIoU
+  documentées pour ne pas confondre les conventions.
+
+Les modules historiques ne sont pas une reproduction certifiée des figures et
+résultats complets. Voir `VALIDATION.md` et `docs/METHODOLOGIE.md` pour la portée.
